@@ -2,7 +2,11 @@ import pygame, sys
 from pygame.locals import *
 import random
 import time
-  
+
+def game_init():
+  stick.centerx = width//2
+  ball.centerx = width//2
+  ball.bottom = height - 20
 pygame.init()
 
 width = 800
@@ -70,8 +74,9 @@ def reset_game():
   global balls
   global ball_velocities
   score = 0
-  balls = [pygame.Rect(width/2, height/2, 20, 20)]
+  balls = [pygame.Rect(width//2, height//2, 20, 20)]
   ball_velocities = [[-1, -1]]
+  game_init()
   create_bricks()
 
 # 벽돌 생성 (메인 루프 밖으로 이동)
@@ -129,6 +134,10 @@ def create_bricks():
     
 create_bricks()
 
+font_for_start = pygame.font.SysFont("굴림", 50)
+
+game_start = True
+
 # 공 리스트 초기화 (파일 상단에 추가)
 balls = [pygame.Rect(width/2, height/2, 20, 20)]
 ball_velocities = [[-1, -1]]  # 각 공의 속도를 저장
@@ -143,78 +152,89 @@ for i in range(3):
   pygame.time.delay(1000)
   screen.fill((0, 0, 0))  # 마지막에 텍스트 지우기
   pygame.display.update()
+  
+mytext = font_for_start.render("게임을 시작하려면 스페이스키를 누르세요", True, (255, 255, 255))
 
 while True:
   for event in pygame.event.get():
     if event.type == QUIT:
       pygame.quit()
       sys.exit()
+    if event.type == KEYDOWN:
+      if event.key == K_SPACE and game_start:
+        game_start = False
+      elif event.key == K_SPACE and not game_start:
+        game_start = True
+        screen.blit(mytext, (width/2 - mytext.get_width()/2, height/2 - mytext.get_height()/2))
+        pygame.display.update()
   if level > 3:
     show_done_screen("게임 클리어")
-  
-  # 스페이스바로 공 복사
-  keys = pygame.key.get_pressed()
-  current_time = time.time()
-  if keys[K_SPACE] and current_time - last_space_press_time > 2:
-    last_space_press_time = current_time
-    new_balls = []
-    new_velocities = []
-    for ball, vel in zip(balls[:], ball_velocities[:]):
-      new_ball = pygame.Rect(ball.x, ball.y, 20, 20)
-      new_velocity = [vel[0], -vel[1]]
-      new_balls.append(new_ball)
-      new_velocities.append(new_velocity)
-    balls.extend(new_balls)
-    ball_velocities.extend(new_velocities)
+  if game_start:
+    # 스페이스바로 공 복사
+    keys = pygame.key.get_pressed()
+    current_time = time.time()
+    if keys[K_TAB] and current_time - last_space_press_time > 2:
+      last_space_press_time = current_time
+      new_balls = []
+      new_velocities = []
+      for ball, vel in zip(balls[:], ball_velocities[:]):
+        new_ball = pygame.Rect(ball.x, ball.y, 20, 20)
+        new_velocity = [vel[0], -vel[1]]
+        new_balls.append(new_ball)
+        new_velocities.append(new_velocity)
+      balls.extend(new_balls)
+      ball_velocities.extend(new_velocities)
 
-  # 스틱 이동 (기존 코드 유지)
-  if keys[K_LEFT]:
-    stick.x -= 6
-  if keys[K_RIGHT]:
-    stick.x += 6
-  if stick.left < 0:
-    stick.left = 0
-  if stick.right > width:
-    stick.right = width
+    # 스틱 이동 (기존 코드 유지)
+    if keys[K_LEFT]:
+      stick.x -= 6
+    if keys[K_RIGHT]:
+      stick.x += 6
+    if stick.left < 0:
+      stick.left = 0
+    if stick.right > width:
+      stick.right = width
 
-  # 모든 공 업데이트
-  balls_to_remove = []  # 제거할 공들의 인덱스를 저장할 리스트
-  for i, (ball, vel) in enumerate(zip(balls[:], ball_velocities[:])):
-    ball.x += level * vel[0]
-    ball.y += level * vel[1]
-    
-    # 벽과 충돌
-    if ball.left <= 0 or ball.right >= width:
-      vel[0] *= -1
-    if ball.top <= 0:
-      vel[1] *= -1
-    if ball.top >= height:
-      balls_to_remove.append(i)  # 제거할 공의 인덱스 저장
-      continue
+    # 모든 공 업데이트
+    balls_to_remove = []  # 제거할 공들의 인덱스를 저장할 리스트
+    for i, (ball, vel) in enumerate(zip(balls[:], ball_velocities[:])):
+      ball.x += level * vel[0]
+      ball.y += level * vel[1]
       
-    ball_num = 0
-    # 막대기와 충돌
-    if ball.colliderect(stick):
-      vel[1] *= -1
-      # 버그 수정
-      ball.bottom = stick.top - 1
-      
-    # 벽돌과 충돌 (기존 코드 유지)
-    for brick, brick_img in zip(bricks, brick_images):
-      if ball.colliderect(brick):
+      # 벽과 충돌
+      if ball.left <= 0 or ball.right >= width:
+        vel[0] *= -1
+      if ball.top <= 0:
         vel[1] *= -1
-        bricks.remove(brick)
-        score += 1
-        break
+      if ball.top >= height:
+        balls_to_remove.append(i)  # 제거할 공의 인덱스 저장
+        continue
         
-  # 루프가 끝난 후 공들을 제거
-  for i in reversed(balls_to_remove):  # 큰 인덱스부터 제거
-    balls.pop(i)
-    ball_velocities.pop(i)
-    if len(balls) == 0:
-      show_restart_screen("게임 오버")
+      ball_num = 0
+      # 막대기와 충돌
+      if ball.colliderect(stick):
+        vel[1] *= -1
+        # 버그 수정
+        ball.bottom = stick.top - 1
+        
+      # 벽돌과 충돌 (기존 코드 유지)
+      for brick, brick_img in zip(bricks, brick_images):
+        if ball.colliderect(brick):
+          vel[1] *= -1
+          bricks.remove(brick)
+          score += 1
+          break
+          
+    # 루프가 끝난 후 공들을 제거
+    for i in sorted(balls_to_remove, reverse=True):  # reversed() 대신 sorted()를 사용
+        if i < len(balls):  # 인덱스가 유효한지 확인
+            balls.pop(i)
+            ball_velocities.pop(i)
+    
+    if len(balls) == 0:  # 모든 공이 제거된 후에 게임 오버 체크
+        show_restart_screen("게임 오버")
     elif score == 96:
-      show_restart_screen("게임 성공")
+        show_restart_screen("게임 성공")
 
   # 화면 그리기
   screen.fill((0, 0, 0))
