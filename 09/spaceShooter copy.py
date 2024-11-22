@@ -32,8 +32,10 @@ bulletImg = pygame.transform.scale(bulletImg, (20, 10))
 bullet = {
   'rect' : pygame.Rect(0, 215, 30, 60),
   'image' : bulletImg,
-  'speed' : 10
+  'speed' : 50
 }
+
+spaceship_velocity = {'x': 0, 'y': 0}
 
 bullets = []
 
@@ -49,25 +51,38 @@ while True:
   
   keyInput = pygame.key.get_pressed()
   if keyInput[K_LEFT]:
-    spaceship['rect'].x -= spaceship['speed']
-    if spaceship['rect'].x < 0:
-      spaceship['rect'].x = 0
+    spaceship_velocity['x'] -= 1
+  else:
+    if spaceship_velocity['x'] < 0:
+      spaceship_velocity['x'] += 1
   if keyInput[K_RIGHT]:
-    spaceship['rect'].x += spaceship['speed']
-    if spaceship['rect'].x > width - spaceship['rect'].width:
-      spaceship['rect'].x = width - spaceship['rect'].width
+    spaceship_velocity['x'] += 1
+  else:
+    if spaceship_velocity['x'] > 0:
+      spaceship_velocity['x'] -= 1
   if keyInput[K_UP]:
-    spaceship['rect'].y -= spaceship['speed']
-    if spaceship['rect'].y < 0:
-      spaceship['rect'].y = 0
+    spaceship_velocity['y'] -= 1
+  else:
+    if spaceship_velocity['y'] < 0:
+      spaceship_velocity['y'] += 1
   if keyInput[K_DOWN]:
-    spaceship['rect'].y += spaceship['speed']
-    if spaceship['rect'].y > height - spaceship['rect'].height:
-      spaceship['rect'].y = height - spaceship['rect'].height
-  
+    spaceship_velocity['y'] += 1
+  else:
+    if spaceship_velocity['y'] > 0:
+      spaceship_velocity['y'] -= 1
+      
   # 배경 X 좌표 이동
-  # backX -= backSpeed
-  # backX2 -= backSpeed
+  backX += -spaceship_velocity['x']
+  backX2 += -spaceship_velocity['x']
+  
+  if spaceship_velocity['x'] < 0 and spaceship['rect'].left >= 0:
+    spaceship['rect'].left += spaceship_velocity['x']
+  elif spaceship_velocity['x'] > 0 and spaceship['rect'].right <= width:
+    spaceship['rect'].right += spaceship_velocity['x']
+  if spaceship_velocity['y'] < 0 and spaceship['rect'].top >= 0:
+    spaceship['rect'].top += spaceship_velocity['y']
+  elif spaceship_velocity['y'] > 0 and spaceship['rect'].bottom <= height:
+    spaceship['rect'].bottom += spaceship_velocity['y']
   
   # 스크롤링
   if backX < -width:
@@ -90,4 +105,4 @@ while True:
     if bu.left > width:
       bullets.remove(bu)
   pygame.display.update()
-  pygame.time.delay(3)
+  pygame.time.delay(50)
