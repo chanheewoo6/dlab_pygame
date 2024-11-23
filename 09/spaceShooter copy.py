@@ -32,7 +32,7 @@ bulletImg = pygame.transform.scale(bulletImg, (20, 10))
 bullet = {
   'rect' : pygame.Rect(0, 215, 30, 60),
   'image' : bulletImg,
-  'speed' : 50
+  'speed' : 4000
 }
 
 spaceship_velocity = {'x': 0, 'y': 0}
