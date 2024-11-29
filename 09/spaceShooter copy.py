@@ -23,7 +23,7 @@ img = pygame.transform.scale(img, (70, 70))
 spaceship = {
   'rect' : pygame.Rect(0, 215, 70, 70),
   'image' : img,
-  'speed' : 3
+  'speed' : 1
 }
 
 # 총알
@@ -32,7 +32,7 @@ bulletImg = pygame.transform.scale(bulletImg, (20, 10))
 bullet = {
   'rect' : pygame.Rect(0, 215, 30, 60),
   'image' : bulletImg,
-  'speed' : 4000
+  'speed' : 18
 }
 
 spaceship_velocity = {'x': 0, 'y': 0}
@@ -100,7 +100,7 @@ while True:
   # 주인공 그리기
   screen.blit(spaceship['image'], spaceship['rect'])
   for bu in bullets:
-    bu.x += 3
+    bu.x += bullet['speed']
     screen.blit(bullet['image'], bu)
     if bu.left > width:
       bullets.remove(bu)
